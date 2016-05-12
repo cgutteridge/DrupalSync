@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+require_once( "DrupalRest.php" );
+
+date_default_timezone_set("Europe/London");
+
+$site = "cjg.drupal";
+$user = "automatic-updates";
+$pass = "muskrat";
+
+$d = new DrupalREST( $site,$user,$pass );
+print_r( $d->get_nodes() );
