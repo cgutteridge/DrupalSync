@@ -75,8 +75,8 @@ class DrupalREST
 		$ret->response = $this->curl_exec($this->crl);
 		$ret->error = curl_error($this->crl);
 		$ret->info = curl_getinfo($this->crl);
-		if( $ret->error ) { print "CREATE: ".$ret->error."\n"; die( "DNAG"); }
-		if( $ret->info["http_code"] != '200' ) { print "CREATE: ".$ret->error."\n"; }
+		if( $ret->error ) { print "CREATE: ".$ret->error."\n"; die( "DANG"); }
+		#if( $ret->info["http_code"] != '200' ) { print "CREATE: ".$ret->error."\n"; }
 		return $ret;
 	}
 
@@ -96,7 +96,7 @@ class DrupalREST
 		$ret->error = curl_error($this->crl);
 		$ret->info = curl_getinfo($this->crl);
 		if( $ret->error ) { print "UPDATE: ".$ret->error."\n"; }
-		if( $ret->info["http_code"] != '200' ) { print "UPDATE: ".$ret->error."\n"; }
+		#if( $ret->info["http_code"] != '200' ) { print "UPDATE: ".$ret->error."\n"; }
 	}
 
 	function close()
@@ -169,7 +169,7 @@ class DrupalREST
 			}
 			else
 			{
-				print "** $id **\n";
+				# print "** $id **\n";
 				if( $node["status"] ) 
 				{
 					// expire only if not already expired
@@ -198,7 +198,7 @@ class DrupalREST
 	function curl_exec($crl)
 	{
 		$result = curl_exec( $crl );
-		print "URL: ". curl_getinfo($crl, CURLINFO_EFFECTIVE_URL )." .. ". curl_getinfo($crl, CURLINFO_HTTP_CODE )."\n";
+		# print "URL: ". curl_getinfo($crl, CURLINFO_EFFECTIVE_URL )." .. ". curl_getinfo($crl, CURLINFO_HTTP_CODE )."\n";
 		return $result;
 	}
 }
