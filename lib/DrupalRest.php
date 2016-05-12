@@ -11,7 +11,7 @@ class DrupalREST
 		$this->url = $site;
 		$this->crl = curl_init();
 
-		curl_setopt($this->crl, CURLOPT_VERBOSE, 1);
+		// curl_setopt($this->crl, CURLOPT_VERBOSE, 1);
 
 		curl_setopt($this->crl, CURLOPT_SSL_VERIFYPEER, 0);
 
