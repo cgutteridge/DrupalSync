@@ -176,6 +176,7 @@ class DrupalREST
 			}
 			if( substr( $result->info["http_code"], 0, 1) != "2" ) 
 			{
+				var_dump( $data );
 				print "Error ".$result->info["http_code"]."\n";
 				print $result->response."\n";
 				exit( 1 );
@@ -196,6 +197,7 @@ class DrupalREST
 				$result = $this->node_create( $data );
 				if( substr( $result->info["http_code"], 0, 1) != "2" ) 
 				{
+					var_dump( $data );
 					print "Error ".$result->info["http_code"]."\n";
 					print $result->response."\n";
 					exit( 1 );
