@@ -76,6 +76,7 @@ class DrupalREST
 		$ret->error = curl_error($this->crl);
 		$ret->info = curl_getinfo($this->crl);
 		if( $ret->error ) { print "CREATE: ".$ret->error."\n"; die( "DANG"); }
+print_r( $ret );
 		if( substr( $ret->info["http_code"], 0, 1) != "2" ) 
 		{
 			print "Error ".$ret->info["http_code"]."\n";
