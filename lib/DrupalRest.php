@@ -177,7 +177,7 @@ class DrupalREST
 			if( substr( $result->info["http_code"], 0, 1) != "2" ) 
 			{
 				print "Error ".$ret->info["http_code"]."\n";
-				print $ret->response."\n":
+				print $ret->response."\n";
 				exit( 1 );
 			}
 		}
@@ -197,7 +197,7 @@ class DrupalREST
 				if( substr( $result->info["http_code"], 0, 1) != "2" ) 
 				{
 					print "Error ".$ret->info["http_code"]."\n";
-					print $ret->response."\n":
+					print $ret->response."\n";
 					exit( 1 );
 				}
 			}
