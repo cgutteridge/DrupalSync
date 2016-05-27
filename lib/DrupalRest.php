@@ -75,14 +75,6 @@ class DrupalREST
 		$ret->response = $this->curl_exec($this->crl);
 		$ret->error = curl_error($this->crl);
 		$ret->info = curl_getinfo($this->crl);
-		if( $ret->error ) { print "CREATE: ".$ret->error."\n"; die( "DANG"); }
-print_r( $ret );
-		if( substr( $ret->info["http_code"], 0, 1) != "2" ) 
-		{
-			print "Error ".$ret->info["http_code"]."\n";
-			print_r( $ret );
-			exit( 1 );
-		}
 		return $ret;
 	}
 
@@ -101,14 +93,7 @@ print_r( $ret );
 		$ret->response = $this->curl_exec($this->crl);
 		$ret->error = curl_error($this->crl);
 		$ret->info = curl_getinfo($this->crl);
-		if( $ret->error ) { print "UPDATE: ".$ret->error."\n"; }
-print_r( $ret );
-		if( substr( $ret->info["http_code"], 0, 1) != "2" ) 
-		{
-			print "Error ".$ret->info["http_code"]."\n";
-			print_r( $ret );
-			exit( 1 );
-		}
+		return $ret;
 	}
 
 	function close()
@@ -189,6 +174,12 @@ print_r( $ret );
 					$result = $this->node_update( $this->url."/node/".$node["nid"], $data );
 				}
 			}
+			if( substr( $result->info["http_code"], 0, 1) != "2" ) 
+			{
+				print "Error ".$ret->info["http_code"]."\n";
+				print $ret->response."\n":
+				exit( 1 );
+			}
 		}
 
 		foreach( $opts["records"] as $id=>$record )
@@ -203,6 +194,12 @@ print_r( $ret );
 				//$data[ "language" ] = "und";
 				$data[ "status" ] = 1;
 				$result = $this->node_create( $data );
+				if( substr( $result->info["http_code"], 0, 1) != "2" ) 
+				{
+					print "Error ".$ret->info["http_code"]."\n";
+					print $ret->response."\n":
+					exit( 1 );
+				}
 			}
 		}	
 	}
