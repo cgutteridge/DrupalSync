@@ -102,7 +102,13 @@ print_r( $ret );
 		$ret->error = curl_error($this->crl);
 		$ret->info = curl_getinfo($this->crl);
 		if( $ret->error ) { print "UPDATE: ".$ret->error."\n"; }
-		#if( $ret->info["http_code"] != '200' ) { print "UPDATE: ".$ret->error."\n"; }
+print_r( $ret );
+		if( substr( $ret->info["http_code"], 0, 1) != "2" ) 
+		{
+			print "Error ".$ret->info["http_code"]."\n";
+			print_r( $ret );
+			exit( 1 );
+		}
 	}
 
 	function close()
