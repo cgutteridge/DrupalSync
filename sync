@@ -1,15 +1,16 @@
 #!/usr/bin/env php
 <?php
-require_once( "DrupalRest.php" );
+require_once( "lib/DrupalRest.php" );
 
 date_default_timezone_set("Europe/London");
 
-$site = "cjg.drupal";
+$site = "uos-test.ecs.soton.ac.uk";
 $user = "automatic-updates";
 $pass = "muskrat";
 
-$content_type = "person";
-$id_field = "field_id_number";
+$content_type = "automatic_ecs_person";
+$id_field = "field_ecs_person_pinumber";
+$hash_field = "field_sync_hash";
 $records_file = "data.json";
 
 
@@ -19,26 +20,9 @@ $d = new DrupalREST( $site,$user,$pass );
 $d->sync(array(
 	"content_type" => $content_type, 
 	"id_field" => $id_field,
+	"hash_field" => $hash_field,
 	"records" => $records,
-	"update" => "update_person_record",
-	"create" => "create_person_record",
+#	"update" => "update_person_record",
+#	"create" => "create_person_record",
 ));
 exit;
-
-function update_person_record( $node, $record )
-{
-	$data = array();
-	$data["title"] = $record["forename"]." ".$record["surname"];
-	$data["field_data"] = json_encode( $record );
-	return $data;
-}
-
-function create_person_record( $record )
-{
-	$data = array();
-	$data["title"] = $record["forename"]." ".$record["surname"];
-	//$data["alias"] = "people/".strtolower($record["forename"]."-".$record["surname"]);
-	$data["field_data"] = json_encode( $record );
-	return $data;
-}
-

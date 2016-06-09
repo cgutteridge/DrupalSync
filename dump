@@ -1,12 +1,14 @@
 #!/usr/bin/env php
 <?php
-require_once( "DrupalRest.php" );
+require_once( "lib/DrupalRest.php" );
 
 date_default_timezone_set("Europe/London");
 
-$site = "cjg.drupal";
+$site = "uos-test.ecs.soton.ac.uk";
 $user = "automatic-updates";
 $pass = "muskrat";
 
+$filter = "nid=5263";
+
 $d = new DrupalREST( $site,$user,$pass );
-print_r( $d->get_nodes() );
+var_dump( $d->get_nodes($filter) );

@@ -119,17 +119,30 @@ class DrupalREST
 
 	static function record_update( $node, $record )
 	{
-		$data = array();
-		$data["field_data"] = json_encode( $record );
-		return $data;
+		return $record;
 	}
 
 	static function record_create( $record )
 	{
-		$data = array();
-		$data["title"] = "New node";
-		$data["field_data"] = json_encode( $record );
-		return $data;
+		return $record;
+	}
+
+	static function json_encode_consistent( $data )
+	{
+		DrupalRest::sort_tree( $data );
+		return json_encode( $data );
+	}
+
+	static function sort_tree( &$data ) 
+	{
+		if( is_array( $data ) ) 
+		{
+			ksort( $data );
+			foreach( $data as $k=>&$v )
+			{
+				DrupalRest::sort_tree( $v );
+			}
+		}
 	}
 
 	function sync($opts)
@@ -161,6 +174,15 @@ class DrupalREST
 			if( array_key_exists( $id, $opts["records"] ) )
 			{
 				$data = call_user_func( $opts["update"], $node, $opts["records"][$id] );
+				if( @$opts["hash_field"] ) 
+				{
+					$new_hash = md5( DrupalRest::json_encode_consistent( $data ) );
+					if( $new_hash == @$node[$opts["hash_field"]] ) 
+					{
+						continue;
+					} 
+					$data[$opts["hash_field"]] = $new_hash;
+				}
 				$data["status"] = 1; // published
 				$result = $this->node_update( $this->url."/node/".$node["nid"], $data );
 			}
@@ -183,25 +205,25 @@ class DrupalREST
 			}
 		}
 
+		// create any which don't exist
 		foreach( $opts["records"] as $id=>$record )
 		{
-			if( !array_key_exists( $id, $nodes_by_id ) )
+			if( array_key_exists( $id, $nodes_by_id ) ) { continue; }
+
+			// create may set fields which are not auto 
+			// updated afterwards.
+			$data = call_user_func( $opts["create"], $record );
+			$data[ $opts["id_field"] ] = $id;
+			$data[ "type" ] = $opts["content_type"];
+			//$data[ "language" ] = "und";
+			$data[ "status" ] = 1;
+			$result = $this->node_create( $data );
+			if( substr( $result->info["http_code"], 0, 1) != "2" ) 
 			{
-				// create may set fields which are not auto 
-				// updated afterwards.
-				$data = call_user_func( $opts["create"], $record );
-				$data[ $opts["id_field"] ] = $id;
-				$data[ "type" ] = $opts["content_type"];
-				//$data[ "language" ] = "und";
-				$data[ "status" ] = 1;
-				$result = $this->node_create( $data );
-				if( substr( $result->info["http_code"], 0, 1) != "2" ) 
-				{
-					var_dump( $data );
-					print "Error ".$result->info["http_code"]."\n";
-					print $result->response."\n";
-					exit( 1 );
-				}
+				var_dump( $data );
+				print "Error ".$result->info["http_code"]."\n";
+				print $result->response."\n";
+				exit( 1 );
 			}
 		}	
 	}
