@@ -185,23 +185,31 @@ class DrupalREST
 				}
 				$data["status"] = 1; // published
 				$result = $this->node_update( $this->url."/node/".$node["nid"], $data );
+				if( substr( $result->info["http_code"], 0, 1) != "2" ) 
+				{
+					var_dump( $data );
+					print "Error in update: ".$result->info["http_code"]."\n";
+					print $result->response."\n";
+					exit( 1 );
+				}
 			}
 			else
 			{
+				# node exists but we'll unpublish it if its currently published
 				# print "** $id **\n";
 				if( $node["status"] ) 
 				{
 					// expire only if not already expired
 					$data = array( "status"=> 0 ); // unpublished
 					$result = $this->node_update( $this->url."/node/".$node["nid"], $data );
+					if( substr( $result->info["http_code"], 0, 1) != "2" ) 
+					{
+						var_dump( $data );
+						print "Error unpublishing: ".$result->info["http_code"]."\n";
+						print $result->response."\n";
+						exit( 1 );
+					}
 				}
-			}
-			if( substr( $result->info["http_code"], 0, 1) != "2" ) 
-			{
-				var_dump( $data );
-				print "Error ".$result->info["http_code"]."\n";
-				print $result->response."\n";
-				exit( 1 );
 			}
 		}
 
@@ -221,7 +229,7 @@ class DrupalREST
 			if( substr( $result->info["http_code"], 0, 1) != "2" ) 
 			{
 				var_dump( $data );
-				print "Error ".$result->info["http_code"]."\n";
+				print "Error in create: ".$result->info["http_code"]."\n";
 				print $result->response."\n";
 				exit( 1 );
 			}
