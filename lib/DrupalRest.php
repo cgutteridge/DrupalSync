@@ -55,7 +55,17 @@ class DrupalREST
 			curl_setopt($this->crl, CURLOPT_HTTPGET, TRUE);
 			curl_setopt($this->crl, CURLOPT_HTTPHEADER, array('Accept: application/json', 'X-CSRF-Token: ' . $this->token));
 			$response = $this->curl_exec($this->crl);
+			$info = curl_getinfo( $this->crl );
+			if( $info["http_code"] != 200 ) {
+				print "Failed to get 200 code from $url. Aborting.\n";
+				print_r( $info );
+				exit(1);
+			}
 			$results = json_decode( $response, true );
+			if( !$results ) { 
+				print "Failed to parse json from $url. Aborting.\n";
+				exit(1);
+			}
 			foreach( $results['list'] as $item ) { $nodes []= $item; }
 		}
 		return $nodes;
