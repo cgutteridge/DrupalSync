@@ -64,6 +64,8 @@ class DrupalREST
 			$results = json_decode( $response, true );
 			if( !$results ) { 
 				print "Failed to parse json from $url. Aborting.\n";
+				print "First kilobyte of response that wasn't JSON:\n";
+				print substr( $response, 0, 1024 )."\n";
 				exit(1);
 			}
 			foreach( $results['list'] as $item ) { $nodes []= $item; }
