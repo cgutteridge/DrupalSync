@@ -189,8 +189,11 @@ class DrupalREST
 				if( @$opts["hash_field"] ) 
 				{
 					$new_hash = md5( DrupalRest::json_encode_consistent( $data ) );
-					if( $new_hash == @$node[$opts["hash_field"]] ) 
+					if( $new_hash == @$node[$opts["hash_field"]] && $node["status"] == 1 ) 
 					{
+						# skip published nodes if they data is unchanged according
+						# to the hash. Always publish if the node status is unpub
+						# as it needs to be un-un-published!
 						continue;
 					} 
 					$data[$opts["hash_field"]] = $new_hash;
