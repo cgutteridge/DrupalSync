@@ -29,7 +29,12 @@ class DrupalREST
 		$ret->response = $this->curl_exec($this->crl);
 		$ret->error = curl_error($this->crl);
 		$ret->info = curl_getinfo($this->crl);
-		if( $ret->error ) { print "LOGIN: ".$ret->error."\n"; }
+		if( $ret->error ) { 
+			print "LOGIN: ".$ret->error."\n"; 
+			print "FAILED to get log in: ".$ret->info["http_code"]."\n"; 
+			print_r( $ret->info );
+			exit( 1 );
+		}
 		
 		// Get RESTWS token.
 		curl_setopt($this->crl, CURLOPT_HTTPGET, TRUE);
@@ -39,7 +44,11 @@ class DrupalREST
 		$ret->error = curl_error($this->crl);
 		$ret->info = curl_getinfo($this->crl);
 		$this->token = $ret->response;
-		if( $ret->info["http_code"] != '200' ) { print "FAILED to get token: ".$ret->info["http_code"]."\n"; }
+		if( $ret->info["http_code"] != '200' ) { 
+			print "FAILED to get token: ".$ret->info["http_code"]."\n"; 
+			print_r( $ret->info );
+			exit( 1 );
+		}
 		if( $ret->error ) { print "GETTOKEN: ".$ret->error."\n"; }
 	}
 
