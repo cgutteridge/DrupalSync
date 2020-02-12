@@ -11,7 +11,7 @@ class DrupalREST
 		$this->url = $site;
 		$this->crl = curl_init();
 
-		// curl_setopt($this->crl, CURLOPT_VERBOSE, 1);
+		curl_setopt($this->crl, CURLOPT_VERBOSE, 0);
 
 		curl_setopt($this->crl, CURLOPT_SSL_VERIFYPEER, 0);
 
@@ -25,31 +25,30 @@ class DrupalREST
 		curl_setopt($this->crl, CURLOPT_POST, TRUE);
 		curl_setopt($this->crl, CURLOPT_POSTFIELDS, "name=" . $user . "&pass=" . $pass . "&form_id=user_login");
 		curl_setopt($this->crl, CURLOPT_COOKIE, session_name() . '=' . session_id());
-		$ret = new stdClass;
-		$ret->response = $this->curl_exec($this->crl);
-		$ret->error = curl_error($this->crl);
-		$ret->info = curl_getinfo($this->crl);
-		if( $ret->error ) { 
-			print "LOGIN: ".$ret->error."\n"; 
-			print "FAILED to get log in: ".$ret->info["http_code"]."\n"; 
-			print_r( $ret->info );
+
+		$response = $this->curl_exec($this->crl);
+		$error = curl_error($this->crl);
+		$info = curl_getinfo($this->crl);
+		if( $error ) { 
+			print "LOGIN: ".$error."\n"; 
+			print "FAILED to get log in: ".$info["http_code"]."\n"; 
+			print_r( $info );
 			exit( 1 );
 		}
 		
 		// Get RESTWS token.
 		curl_setopt($this->crl, CURLOPT_HTTPGET, TRUE);
 		curl_setopt($this->crl, CURLOPT_URL, $this->url . '/restws/session/token');
-		$ret = new stdClass;
-		$ret->response = $this->curl_exec($this->crl);
-		$ret->error = curl_error($this->crl);
-		$ret->info = curl_getinfo($this->crl);
-		$this->token = $ret->response;
-		if( $ret->info["http_code"] != '200' ) { 
-			print "FAILED to get token: ".$ret->info["http_code"]."\n"; 
-			print_r( $ret->info );
+		$response = $this->curl_exec($this->crl);
+		$error = curl_error($this->crl);
+		$info = curl_getinfo($this->crl);
+		$this->token = $response;
+		if( $info["http_code"] != '200' ) { 
+			print "FAILED to get token: ".$info["http_code"]."\n"; 
+			print_r( $info );
 			exit( 1 );
 		}
-		if( $ret->error ) { print "GETTOKEN: ".$ret->error."\n"; }
+		if( $error ) { print "GETTOKEN: ".$error."\n"; }
 	}
 
 	function get_nodes($filter="")
@@ -63,18 +62,9 @@ class DrupalREST
 			curl_setopt($this->crl, CURLOPT_URL, $url );
 			curl_setopt($this->crl, CURLOPT_HTTPGET, TRUE);
 			curl_setopt($this->crl, CURLOPT_HTTPHEADER, array('Accept: application/json', 'X-CSRF-Token: ' . $this->token));
-			$response = $this->curl_exec($this->crl);
-			$info = curl_getinfo( $this->crl );
-			if( $info["http_code"] != 200 ) {
-				print "Failed to get 200 code from $url. Aborting.\n";
-				print_r( $info );
-				exit(1);
-			}
-			$results = json_decode( $response, true );
-			if( !$results ) { 
-				print "Failed to parse json from $url. Aborting.\n";
-				print "First kilobyte of response that wasn't JSON:\n";
-				print substr( $response, 0, 1024 )."\n";
+			$results = $this->try_curl( $this->crl, 10, $url );
+			if( !$results ) {
+				print "Failed to get data from $url. Aborting.\n";
 				exit(1);
 			}
 			foreach( $results['list'] as $item ) { $nodes []= $item; }
@@ -82,6 +72,27 @@ class DrupalREST
 		return $nodes;
 	}
 
+	function try_curl( $crl, $ttl, $url ) {
+		# print "[**$url]\n";
+		while( $ttl ) {
+			$ttl--;
+			$response = $this->curl_exec($this->crl);
+			$info = curl_getinfo( $this->crl );
+			if( $info["http_code"] != 200 ) {
+				print "Failed to get 200 code from $url. Retries: $ttl.\n";
+				continue;
+			}
+			$results = json_decode( $response, true );
+			if( !$results ) { 
+				print "Failed to parse json from $url. Retries: $ttl.\n";
+print_r( $response );
+				continue;
+			}
+			return $results;
+		}
+		return false;
+	}
+			
 	function node_create( $data )
 	{	
 		curl_setopt($this->crl, CURLOPT_POST, TRUE);
@@ -213,6 +224,7 @@ class DrupalREST
 				{
 					var_dump( $data );
 					print "Error in update: ".$result->info["http_code"]."\n";
+					var_dump( $result );
 					print $result->response."\n";
 					exit( 1 );
 				}
