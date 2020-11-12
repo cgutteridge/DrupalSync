@@ -162,7 +162,7 @@ print_r( $response );
 	static function json_encode_consistent( $data )
 	{
 		DrupalRest::sort_tree( $data );
-		return json_encode( $data );
+		return json_encode( $data,  JSON_INVALID_UTF8_IGNORE );
 	}
 
 	static function sort_tree( &$data ) 
